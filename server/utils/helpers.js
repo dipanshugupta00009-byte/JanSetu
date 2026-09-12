@@ -85,6 +85,7 @@ const PHONE_RE = /^\+?[0-9]{10,13}$/;
 
 function isEmail(v) { return EMAIL_RE.test(v); }
 function isPhone(v) { return PHONE_RE.test(String(v).replace(/[\s-]/g, '')); }
+function isGmail(v) { return isEmail(v) && String(v).toLowerCase().endsWith('@gmail.com'); }
 
 module.exports = {
   randId,
@@ -98,5 +99,6 @@ module.exports = {
   asStringArray,
   toFloat,
   isEmail,
+  isGmail,
   isPhone,
 };

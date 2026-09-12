@@ -8,7 +8,7 @@ const store = require('../data/store');
 const env = require('../config/env');
 const { asyncHandler, audit } = require('../middleware/handlers');
 const authMw = require('../middleware/auth');
-const { isEmail, isPhone, sanitizeText, isStrongPassword } = require('../utils/helpers');
+const { isEmail, isGmail, isPhone, sanitizeText, isStrongPassword } = require('../utils/helpers');
 const crypto = require('crypto');
 
 const router = express.Router();
@@ -59,6 +59,7 @@ router.post('/google', asyncHandler(async (req, res) => {
  
   const email = String(info.email || '').toLowerCase().trim();
   if (!isEmail(email)) return res.status(400).json({ error: 'Google returned an invalid email address.' });
+  if (!isGmail(email)) return res.status(400).json({ error: 'Citizen accounts require a Gmail address ending with @gmail.com.' });
  
   const name = sanitizeText(info.name || email.split('@')[0] || 'Google User', 120);
   let user = await store.findUserByEmail(email);
@@ -107,6 +108,9 @@ router.post('/register', asyncHandler(async (req, res) => {
   if (!name) return res.status(400).json({ error: 'Please enter your full name.' });
   if (!isEmail(email) && !isPhone(phone)) {
     return res.status(400).json({ error: 'A valid email or mobile number is required.' });
+  }
+  if (role === 'citizen' && email && !isGmail(email)) {
+    return res.status(400).json({ error: 'Citizen accounts require a Gmail address ending with @gmail.com.' });
   }
   if (!isStrongPassword(password)) {
     return res.status(400).json({ error: 'Password must be at least 8 characters and contain letters and numbers/symbols.' });

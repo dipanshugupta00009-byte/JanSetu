@@ -31,6 +31,7 @@
       const p2 = $('rg-password2').value;
       if (!name) return J.toast('Please enter your name.', true);
       if ((!email && !phone)) return J.toast('Email or mobile number is required.', true);
+      if (role === 'citizen' && email && !/^[^\s@]+@gmail\.com$/i.test(email)) return J.toast('Citizen accounts require a Gmail address ending with @gmail.com.', true);
       if (((role === 'institution') || (role === 'industry')) && !org) return J.toast('Organisation name is required for this role.', true);
       if (p1 !== p2) return J.toast('Passwords do not match.', true);
       if (p1.length < 8) return J.toast('Password must be at least 8 characters.', true);
@@ -68,8 +69,8 @@
     try {
       const data = await J.api('/auth/google', { method: 'POST', body: JSON.stringify({ credential: response.credential, language: J.getLang() }) });
       J.invalidateMe();
-      const nq = new URLSearchParams(window.location.search.get('next'));
-      window.location.href = nq ? nq : '/dashboard.html';
+      const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
+      window.location.href = next;
     } catch (err) {
       if (btn) { btn.disabled = false; }
       J.toast(err.message, true);

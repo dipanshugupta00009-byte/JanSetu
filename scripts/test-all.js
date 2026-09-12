@@ -213,9 +213,25 @@ async function run() {
     const strong = await fetch(BASE + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Security Tested User', email: 'secuser' + Date.now() + '@test.com', password: 'StrongPass@2026' }),
+      body: JSON.stringify({ name: 'Security Tested User', email: 'secuser' + Date.now() + '@gmail.com', password: 'StrongPass@2026' }),
     });
     assert.strictEqual(strong.status, 201, 'Strong password registration must succeed');
+  });
+
+  await test('Citizen Registration Requires Gmail Address', async () => {
+    const nonGmail = await fetch(BASE + '/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Non Gmail Citizen', email: 'citizen' + Date.now() + '@example.com', password: 'StrongPass@2026' }),
+    });
+    assert.strictEqual(nonGmail.status, 400, 'Citizen registration with a non-Gmail address must fail');
+
+    const evaluator = await fetch(BASE + '/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Non Gmail Evaluator', role: 'evaluator', email: 'evaluator' + Date.now() + '@example.com', password: 'StrongPass@2026' }),
+    });
+    assert.strictEqual(evaluator.status, 201, 'Non-citizen registration may use a non-Gmail address');
   });
 
   await test('Security Audit Trails: Failed Logins Recorded in Audit Logs', async () => {

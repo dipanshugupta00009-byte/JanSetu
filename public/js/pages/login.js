@@ -43,8 +43,8 @@
     try {
       const data = await J.api('/auth/google', { method: 'POST', body: JSON.stringify({ credential: response.credential, language: J.getLang() }) });
       J.invalidateMe();
-      const nq = new URLSearchParams(window.location.search.get('next'));
-      window.location.href = nq ? nq : '/dashboard.html';
+      const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
+      window.location.href = next;
     } catch (err) {
       if (btn) { btn.disabled = false; }
       J.toast(err.message, true);
