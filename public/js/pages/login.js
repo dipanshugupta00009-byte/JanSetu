@@ -73,7 +73,15 @@
           width: 300,
         });
       }
-    } catch (e) { /* Google sign-in unavailable � skip silently */ }
+    } catch (e) {
+      console.error('Google sign-in unavailable:', e);
+      const gAuth = $('google-auth');
+      if (gAuth) {
+        gAuth.classList.remove('hide');
+        const note = gAuth.querySelector('.sm-note');
+        if (note) note.textContent = 'Google sign-in is unavailable for this website origin. Add this site to the Google OAuth authorised origins.';
+      }
+    }
   }
   initGoogleAuth();
   document.addEventListener('DOMContentLoaded', init);

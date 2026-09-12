@@ -51,17 +51,23 @@
     'nav.logout': { en: 'Logout', hi: 'लॉगआउट' },
     'brand.slogan': { en: 'Jharkhand Community Problem & Solution Platform', hi: 'झारखंड सामुदायिक समस्या एवं समाधान मंच' },
     'brand.nep': { en: 'NEP 2020 Aligned', hi: 'राष्ट्रीय शिक्षा नीति 2020' },
+    'gov.name': { en: 'Government of Jharkhand', hi: 'झारखंड सरकार' },
+    'hero.sub': { en: "Report ground-level civic and social problems of your village, block or district — and let Jharkhand's universities and industry partners develop real solutions with you.", hi: 'अपने गांव, प्रखंड या जिले की नागरिक और सामाजिक समस्याओं को दर्ज करें — झारखंड के विश्वविद्यालय और उद्योग साझेदार आपके साथ वास्तविक समाधान विकसित करेंगे।' },
   };
   let LANG = 'en';
   try { LANG = localStorage.getItem('jansetu_lang') === 'hi' ? 'hi' : 'en'; } catch (e) {}
 
   function t(key) { const e = DICT[key]; return e ? e[LANG] : key; }
   J.t = t;
+  function applyLanguage() {
+    document.documentElement.lang = LANG;
+    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.getAttribute('data-i18n')); });
+    document.querySelectorAll('.lang-switch button').forEach((b) => b.classList.toggle('active', b.dataset.lang === LANG));
+  }
   J.setLang = function (lang) {
     LANG = lang === 'hi' ? 'hi' : 'en';
     try { localStorage.setItem('jansetu_lang', LANG); } catch (e) {}
-    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.getAttribute('data-i18n')); });
-    document.querySelectorAll('.lang-switch button').forEach((b) => b.classList.toggle('active', b.dataset.lang === LANG));
+    applyLanguage();
   };
   J.getLang = function () { return LANG; };
   function initLangButtons() {
@@ -143,10 +149,10 @@
     fetchMe().then((me) => {
       const user = me.user;
       const links = roleLinks(user);
-      const navHtml = links.map((l) => '<li><a href="' + l.href + '"' + (l.action ? ' id="logout-link"' : '') + (activeKey === l.key ? ' class="active"' : '') + '>' + t(l.key) + '</a></li>').join('');
+      const navHtml = links.map((l) => '<li><a href="' + l.href + '"' + (l.action ? ' id="logout-link"' : '') + (activeKey === l.key ? ' class="active"' : '') + '><span data-i18n="' + l.key + '">' + t(l.key) + '</span></a></li>').join('');
       holder.innerHTML = `
       <div class="gov-strip">
-        <span>🇮🇳 Government of Jharkhand · झारखंड सरकार</span>
+        <span>🇮🇳 <span data-i18n="gov.name">${t('gov.name')}</span></span>
         <span style="flex:1"></span>
         <span class="lang-switch">
           <button data-lang="en">English</button>
@@ -158,7 +164,7 @@
           <img src="/logo.png" alt="JanSetu" class="seal" />
           <div>
             <div class="title-b">JanSetu · जनसाथ</div>
-            <div class="title-s">${t('brand.slogan')} · ${t('brand.nep')}</div>
+            <div class="title-s"><span data-i18n="brand.slogan">${t('brand.slogan')}</span> · <span data-i18n="brand.nep">${t('brand.nep')}</span></div>
           </div>
           <div class="spacer"></div>
           ${user ? '<span class="user-chip">👤 ' + esc(user.name) + ' <span class="pill">' + esc(user.role) + '</span></span>' : ''}
@@ -166,6 +172,7 @@
         <nav class="menu"><ul>${navHtml}</ul></nav>
       </header>`;
       initLangButtons();
+      applyLanguage();
       const lo = document.getElementById('logout-link');
       if (lo) lo.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     });

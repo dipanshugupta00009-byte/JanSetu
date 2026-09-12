@@ -138,7 +138,7 @@ async function seedDemoIfEmpty() {
 // Users
 // ---------------------------------------------------------------------------
 async function createUser(data) {
-  const { data: out } = await client.from(TABLES.users).insert([{
+  const result = await client.from(TABLES.users).insert([{
     name: data.name,
     email: data.email || null,
     phone: data.phone || null,
@@ -148,7 +148,9 @@ async function createUser(data) {
     district: data.district || null,
     language: data.language || 'hi',
   }]).select('*');
-  const user = out[0];
+  if (result.error) throw result.error;
+  const user = result.data && result.data[0];
+  if (!user) throw new Error('The account could not be saved. Please try again.');
   if (user.role === 'institution') {
     await client.from(TABLES.institutions).insert([{
       user_id: user.id, reg_no: data.reg_no || 'HEI-' + String(Date.now()).slice(-8),

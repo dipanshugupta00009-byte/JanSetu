@@ -10,8 +10,51 @@ const { asyncHandler, audit } = require('../middleware/handlers');
 const authMw = require('../middleware/auth');
 const { isEmail, isGmail, isPhone, sanitizeText, isStrongPassword } = require('../utils/helpers');
 const crypto = require('crypto');
+const { sendGmailOtp } = require('../utils/mailer');
 
 const router = express.Router();
+const gmailOtps = new Map();
+const OTP_TTL_MS = 10 * 60 * 1000;
+
+function otpHash(email, otp) {
+  return crypto.createHash('sha256').update(email + ':' + otp + ':' + env.JWT_SECRET).digest('hex');
+}
+
+router.post('/gmail/request-otp', asyncHandler(async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  if (!isGmail(email)) return res.status(400).json({ error: 'Enter a valid Gmail address ending with @gmail.com.' });
+  if (await store.findUserByEmail(email)) return res.status(409).json({ error: 'An account with this Gmail address already exists. Please login.' });
+  const existing = gmailOtps.get(email);
+  if (existing && existing.sentAt > Date.now() - 60 * 1000) return res.status(429).json({ error: 'Please wait one minute before requesting another code.' });
+  const otp = String(crypto.randomInt(100000, 1000000));
+  try {
+    await sendGmailOtp(email, otp);
+  } catch (e) {
+    return res.status(503).json({ error: e.message });
+  }
+  gmailOtps.set(email, { hash: otpHash(email, otp), sentAt: Date.now(), expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
+  res.json({ message: 'Verification code sent to your Gmail address.' });
+}));
+
+router.post('/gmail/verify-otp', (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const otp = String(req.body.otp || '').trim();
+  const record = gmailOtps.get(email);
+  if (!isGmail(email) || !/^\d{6}$/.test(otp) || !record || record.expiresAt < Date.now()) {
+    gmailOtps.delete(email);
+    return res.status(400).json({ error: 'The verification code is invalid or expired.' });
+  }
+  record.attempts += 1;
+  if (record.attempts > 5) {
+    gmailOtps.delete(email);
+    return res.status(429).json({ error: 'Too many incorrect attempts. Request a new code.' });
+  }
+  if (otpHash(email, otp) !== record.hash) return res.status(400).json({ error: 'The verification code is incorrect.' });
+  gmailOtps.delete(email);
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  gmailOtps.set('verified:' + verificationToken, { email, expiresAt: Date.now() + OTP_TTL_MS });
+  res.json({ verificationToken, message: 'Gmail address verified.' });
+});
 
 // ---------------------------------------------------------------------------
 // Google Sign-in (Sign in with Google / Gmail – direct Gmail connection option)
@@ -68,16 +111,23 @@ router.post('/google', asyncHandler(async (req, res) => {
     // New visitor – create a Citizen account with an unusable password (Google handles auth)
     const randomHash = bcrypt.hashSync(crypto.randomUUID() + ':' + Date.now(), 10);
     const lang = ['hi', 'en', 'sat'].includes(req.body.language) ? req.body.language : 'hi';
-    user = await store.createUser({
-      name: name || 'Google User',
-      email: email,
-      phone: null,
-      password_hash: randomHash,
-      role: 'citizen',
-      org_name: null,
-      district: null,
-      language: lang,
-    });
+    try {
+      user = await store.createUser({
+        name: name || 'Google User',
+        email: email,
+        phone: null,
+        password_hash: randomHash,
+        role: 'citizen',
+        org_name: null,
+        district: null,
+        language: lang,
+      });
+    } catch (e) {
+      if (e && e.code === '23505') {
+        return res.status(409).json({ error: 'An account with this Gmail address already exists. Please use the login form.' });
+      }
+      throw e;
+    }
     audit(req, 'register_google', 'user', user.id, { email });
   }
  
@@ -111,6 +161,14 @@ router.post('/register', asyncHandler(async (req, res) => {
   }
   if (role === 'citizen' && email && !isGmail(email)) {
     return res.status(400).json({ error: 'Citizen accounts require a Gmail address ending with @gmail.com.' });
+  }
+  if (role === 'citizen' && email) {
+    const token = String(body.gmail_verification_token || '');
+    const verified = gmailOtps.get('verified:' + token);
+    if (!verified || verified.expiresAt < Date.now() || verified.email !== email) {
+      return res.status(400).json({ error: 'Please verify your Gmail address before creating a citizen account.' });
+    }
+    gmailOtps.delete('verified:' + token);
   }
   if (!isStrongPassword(password)) {
     return res.status(400).json({ error: 'Password must be at least 8 characters and contain letters and numbers/symbols.' });

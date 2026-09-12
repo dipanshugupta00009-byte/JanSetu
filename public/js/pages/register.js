@@ -13,6 +13,26 @@
     const me = await J.fetchMe();
     if (me.authed) { window.location.href = '/dashboard.html'; return; }
     await loadDistricts();
+    let gmailVerificationToken = '';
+
+    $('send-gmail-otp').addEventListener('click', async () => {
+      const email = $('rg-email').value.trim();
+      try {
+        const result = await J.api('/auth/gmail/request-otp', { method: 'POST', body: JSON.stringify({ email }) });
+        $('gmail-otp-field').classList.remove('hide');
+        $('gmail-verification-status').textContent = result.message;
+      } catch (err) { J.toast(err.message, true); }
+    });
+    $('verify-gmail-otp').addEventListener('click', async () => {
+      const email = $('rg-email').value.trim();
+      try {
+        const result = await J.api('/auth/gmail/verify-otp', { method: 'POST', body: JSON.stringify({ email, otp: $('rg-gmail-otp').value.trim() }) });
+        gmailVerificationToken = result.verificationToken;
+        $('gmail-verification-status').textContent = result.message;
+        $('verify-gmail-otp').disabled = true;
+        $('send-gmail-otp').disabled = true;
+      } catch (err) { J.toast(err.message, true); }
+    });
 
     $('rg-role').addEventListener('change', () => {
       const v = $('rg-role').value;
@@ -38,7 +58,7 @@
       const btn = e.target.querySelector('button[type=submit]');
       btn.disabled = true; btn.textContent = 'Creating account�';
       try {
-        const data = await J.api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, phone, role, org_name: org, district, password: p1, language: J.getLang() }) });
+        const data = await J.api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, phone, role, org_name: org, district, password: p1, language: J.getLang(), gmail_verification_token: gmailVerificationToken }) });
         J.invalidateMe();
         const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
         window.location.href = next;
@@ -99,7 +119,15 @@
           width: 300,
         });
       }
-    } catch (e) { /* Google sign-in unavailable � skip silently */ }
+    } catch (e) {
+      console.error('Google sign-in unavailable:', e);
+      const gAuth = $('google-auth');
+      if (gAuth) {
+        gAuth.classList.remove('hide');
+        const note = gAuth.querySelector('.sm-note');
+        if (note) note.textContent = 'Google sign-in is unavailable for this website origin. Add this site to the Google OAuth authorised origins.';
+      }
+    }
   }
   initGoogleAuth();
   document.addEventListener('DOMContentLoaded', init);

@@ -33,7 +33,14 @@
         <div class="form-row">
           <div class="field">
             <label>Email</label>
-            <input type="email" id="rg-email" />
+            <input type="email" id="rg-email" placeholder="yourname@gmail.com" />
+            <button type="button" class="btn sm" id="send-gmail-otp">Send Gmail OTP</button>
+            <div class="field hide" id="gmail-otp-field">
+              <label>Gmail verification code</label>
+              <input type="text" id="rg-gmail-otp" inputmode="numeric" maxlength="6" />
+              <button type="button" class="btn sm" id="verify-gmail-otp">Verify Gmail</button>
+              <span class="muted sm-note" id="gmail-verification-status"></span>
+            </div>
           </div>
           <div class="field">
             <label>Mobile Number</label>

@@ -122,7 +122,7 @@ app.post('/api/problems/:id/vote', voteLimiter);
 // ---------------------------------------------------------------------------
 // Static + uploads
 // ---------------------------------------------------------------------------
-app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '1h' }));
+app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: env.IS_PROD ? '1h' : 0 }));
 app.use('/uploads', (req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Content-Disposition', 'inline');
