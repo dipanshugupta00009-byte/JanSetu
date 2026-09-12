@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track Status · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <h1>🔍 Track a Problem · समस्या की स्थिति</h1>
+    <p class="muted">Enter your report ID (e.g. JST-2026-0003) to see the live status and resolution journey.</p>
+
+    <div class="card flex">
+      <input type="text" id="trk-id" placeholder="JST-2026-0001" style="max-width:280px" />
+      <button class="btn" id="trk-go">Track · देखें</button>
+    </div>
+
+    <div id="track-result" class="mt-2"></div>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/track.js"></script>
+</body>
+</html>

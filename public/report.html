@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report a Problem · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="container">
+    <h1>📋 Report a Community Problem</h1>
+    <p class="muted">Tell us about a civic or social problem in your area. Add photos, location and as much detail as you can. Your report goes to an expert review panel.</p>
+
+    <div id="auth-warning" class="alert info hide">Please <a href="/login.html?next=/report.html">login</a> or <a href="/register.html">register</a> to submit a problem.</div>
+
+    <form id="report-form" class="card mt-2">
+      <div class="form-row">
+        <div class="field">
+          <label class="req">Problem Title · समस्या का शीर्षक</label>
+          <input type="text" id="pv-title" placeholder="e.g. Handpump dry in Bandgaon village for 3 weeks" maxlength="160" required />
+        </div>
+        <div class="field">
+          <label class="req">Category · श्रेणी</label>
+          <select id="pv-category" required></select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="req">Problem Description · समस्या का विवरण</label>
+        <textarea id="pv-desc" placeholder="Describe the problem: who is affected, since when, how severe, what has been tried…" maxlength="4000" required></textarea>
+        <div class="hint">
+          <button type="button" id="voice-btn" class="btn sm ghost">🎤 Voice input · वॉइस इनपुट</button>
+          <span id="voice-status"></span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tags (comma separated) · टैग</label>
+        <input type="text" id="pv-tags" placeholder="e.g. handpump, drought, children" />
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label class="req">District · जिला</label>
+          <select id="pv-district" required></select>
+        </div>
+        <div class="field">
+          <label>Block · प्रखंड</label>
+          <input type="text" id="pv-block" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Village / Locality · गाँव / इलाका</label>
+          <input type="text" id="pv-village" />
+        </div>
+        <div class="field">
+          <label>Detailed Address · पता</label>
+          <input type="text" id="pv-address" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>📍 Location on Map · नक्शे पर स्थान</label>
+        <div id="map"></div>
+        <div class="flex mt-1">
+          <button type="button" id="geo-autodetect" class="btn sm ghost">🎯 Auto-detect my location</button>
+          <button type="button" id="geo-reset" class="btn sm ghost">Reset Pin</button>
+          <span class="hint" id="geo-hint">Click on the map to drop a pin.</span>
+        </div>
+        <input type="hidden" id="pv-lat" /><input type="hidden" id="pv-lng" />
+      </div>
+
+      <div class="field">
+        <label>📎 Evidence Photos / Video / Documents (max 5, ≤15 MB each)</label>
+        <input type="file" id="pv-files" accept="image/*,video/mp4,video/webm,application/pdf" multiple />
+        <div id="pv-file-list" class="flex mt-1"></div>
+      </div>
+
+      <div class="field">
+        <label class="flex" style="font-weight:500">
+          <input type="checkbox" id="pv-anonymous" style="width:auto" /> &nbsp;Submit anonymously (identity hidden from public view)
+        </label>
+      </div>
+
+      <div class="spread">
+        <button type="button" id="pv-draft" class="btn ghost">💾 Save Draft</button>
+        <button type="submit" class="btn">🚀 Submit for Review</button>
+      </div>
+      <div id="pv-similar" class="mt-2"></div>
+    </form>
+  </div>
+
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/report.js"></script>
+</body>
+</html>

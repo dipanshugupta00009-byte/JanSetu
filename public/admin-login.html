@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Administrator Login · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="auth-wrap">
+      <img src="/logo.png" alt="JanSetu" class="auth-logo" />
+      <h2 class="center">District Administrator Login · एडमिन लॉगिन</h2>
+      <form id="admin-login-form" class="card">
+        <div class="field">
+          <label class="req">Admin Username</label>
+          <input type="text" id="adm-username" placeholder="admin" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label class="req">Admin Password</label>
+          <input type="password" id="adm-password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn" style="width:100%">Login as Administrator · एडमिन लॉगिन</button>
+        <div class="demo-box mt-2">
+          <b>Default Administrator Credentials:</b><br/>
+          Username: <code>admin</code><br/>
+          Password: <code>Jansetu@2024</code>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script>
+    (function () {
+      const J = window.JanSetu;
+      const $ = (id) => document.getElementById(id);
+      document.addEventListener('DOMContentLoaded', async () => {
+        J.renderHeader('nav.adminlogin');
+        J.renderFooter();
+        const me = await J.fetchMe();
+        if (me.authed && me.user.role === 'admin') {
+          window.location.href = '/admin.html';
+          return;
+        }
+        $('admin-login-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const btn = e.target.querySelector('button[type=submit]');
+          btn.disabled = true;
+          btn.textContent = 'Verifying…';
+          try {
+            await J.api('/auth/admin-login', {
+              method: 'POST',
+              body: JSON.stringify({
+                username: $('adm-username').value.trim(),
+                password: $('adm-password').value,
+              }),
+            });
+            J.invalidateMe();
+            window.location.href = '/admin.html';
+          } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Login as Administrator · एडमिन लॉगिन';
+            J.toast(err.message, true);
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

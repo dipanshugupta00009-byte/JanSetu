@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="auth-wrap" style="max-width:520px">
+      <img src="/logo.png" alt="JanSetu" class="auth-logo" />
+      <h2 class="center">Create Account · पंजीकरण करें</h2>
+      <form id="reg-form" class="card">
+        <div class="field">
+          <label class="req">Full Name · पूरा नाम</label>
+          <input type="text" id="rg-name" required />
+        </div>
+        <div class="field">
+          <label class="req">I am a · मैं हूँ</label>
+          <select id="rg-role">
+            <option value="citizen">Citizen / Community Member</option>
+            <option value="evaluator">Domain Expert / Evaluator</option>
+            <option value="institution">Higher Education Institution (HEI)</option>
+            <option value="industry">Industry / Startup / NGO</option>
+          </select>
+        </div>
+        <div class="field hide" id="rg-org-field">
+          <label class="req">Organisation / Institute Name</label>
+          <input type="text" id="rg-org" />
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="rg-email" />
+          </div>
+          <div class="field">
+            <label>Mobile Number</label>
+            <input type="tel" id="rg-phone" placeholder="10-digit mobile" />
+          </div>
+        </div>
+        <div class="field">
+          <label>District · जिला</label>
+          <select id="rg-district"></select>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label class="req">Password (min 8 characters)</label>
+            <input type="password" id="rg-password" minlength="8" required />
+          </div>
+          <div class="field">
+            <label class="req">Confirm Password</label>
+            <input type="password" id="rg-password2" required />
+          </div>
+        </div>
+        <button type="submit" class="btn" style="width:100%">Create Account · खाता बनाएँ</button>
+        <div id="google-auth" class="google-auth hide">
+          <div class="auth-divider"><span>or · या</span></div>
+          <div id="google-btn"></div>
+          <p class="muted sm-note">Sign in with Google creates a Citizen account · गूगल से साइन इन</p>
+        </div>
+        <p class="muted mt-2 center">Already registered? <a href="/login.html">Login here</a></p>
+      </form>
+    </div>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/register.js"></script>
+</body>
+</html>

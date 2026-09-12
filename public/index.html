@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JanSetu · जनसाथ — Jharkhand Community Problem & Solution Platform</title>
+  <meta name="description" content="JanSetu connects citizens of Jharkhand with universities (HEIs) and industry partners to solve local civic and social problems under NEP 2020." />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <div class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <h1>बताइए समस्या, बनाइए समाधान</h1>
+      <p data-i18n="hero.sub">Report ground-level civic and social problems of your village, block or district — and let Jharkhand's universities and industry partners develop real solutions with you.</p>
+      <div class="cta-row">
+        <a class="btn light" href="/report.html">📋 Report a Problem · समस्या दर्ज करें</a>
+        <a class="btn ghost" href="/problems.html">Explore Problem Bank · समस्या बैंक</a>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="grid cols-4" id="stats-row"></section>
+
+    <!-- Sectors -->
+    <section class="card tint mt-2">
+      <h3>📍 Problem Sectors · समस्या क्षेत्र</h3>
+      <div class="flex" id="sector-chips"></div>
+    </section>
+
+    <!-- How it works -->
+    <h2 class="mt-3">How It Works · कैसे काम करता है</h2>
+    <section class="grid cols-4">
+      <div class="card"><h3>1️⃣ Report</h3><p>Citizens submit problems with photos, videos and location in Hindi or English.</p></div>
+      <div class="card"><h3>2️⃣ Expert Review</h3><p>Domain experts score and triage each submission using a structured rubric.</p></div>
+      <div class="card"><h3>3️⃣ Adopt &amp; Solve</h3><p>HEIs and industry partners adopt problems, form student teams and prototype.</p></div>
+      <div class="card"><h3>4️⃣ Deploy &amp; Impact</h3><p>Solutions are piloted, deployed and tracked to measurable community impact.</p></div>
+    </section>
+
+    <!-- Stakeholders -->
+    <h2 class="mt-3">Who Participates · कौन जुड़ता है</h2>
+    <section class="grid cols-3">
+      <div class="card">
+        <h3>👨‍👩‍👧 Citizens &amp; Communities</h3>
+        <p>Report and endorse problems, track resolution, and co-create solutions for your own village, block and district.</p>
+      </div>
+      <div class="card">
+        <h3>🎓 Higher Education Institutions</h3>
+        <p>Faculty and students get authentic, credit-linked (NEP 2020) project experience by solving real community problems.</p>
+      </div>
+      <div class="card">
+        <h3>🏭 Industry &amp; Startups</h3>
+        <p>Co-fund solutions through CSR, sponsor pilots, and collaborate with universities on deployment and scale-up.</p>
+      </div>
+    </section>
+
+    <!-- Recent problems -->
+    <div class="spread mt-3 mb-1">
+      <h2>Recent Reports · ताज़ा समस्याएँ</h2>
+      <a class="btn sm ghost" href="/problems.html">View All →</a>
+    </div>
+    <section id="recent-problems"></section>
+  </div>
+
+  <div id="app-footer"></div>
+
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/home.js"></script>
+</body>
+</html>

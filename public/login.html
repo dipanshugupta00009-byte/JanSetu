@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="auth-wrap">
+      <img src="/logo.png" alt="JanSetu" class="auth-logo" />
+      <h2 class="center">Login to JanSetu · लॉगइन करें</h2>
+      <form id="login-form" class="card">
+        <div class="field">
+          <label>Email or Mobile Number · ईमेल या मोबाइल</label>
+          <input type="text" id="lg-login" placeholder="you@example.com or 9876543210" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label>Password · पासवर्ड</label>
+          <input type="password" id="lg-password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn" style="width:100%">Login · लॉगिन</button>
+        <div id="google-auth" class="google-auth hide">
+          <div class="auth-divider"><span>or · या</span></div>
+          <div id="google-btn"></div>
+          <p class="muted sm-note">Sign in with Google · गूगल से साइन इन</p>
+        </div>
+        <p class="muted mt-2 center">New user? <a href="/register.html">Register here</a></p>
+        <div class="demo-box">
+          <b>Demo accounts</b> (password: <b>Demo@123</b>)<br/>
+          Citizen: ram@example.com<br/>Evaluator: sinha@example.com<br/>HEI: nirmal@example.com<br/>Industry: meena@example.com
+        </div>
+      </form>
+    </div>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Impact Dashboard · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="spread">
+      <h1>📊 Public Impact Dashboard</h1>
+      <button class="btn sm ghost" onclick="window.print()">🖨️ Print Report</button>
+    </div>
+    <p class="muted">Live, data-backed view of community problems and solutions across Jharkhand. Data is open for researchers and journalists — <a href="/api/admin/export.csv">CSV export (admin)</a>.</p>
+
+    <section class="grid cols-4 mt-2" id="impact-stats"></section>
+
+    <section class="grid cols-2 mt-2">
+      <div class="card">
+        <h3>Problems by Sector · क्षेत्रवार समस्याएँ</h3>
+        <canvas id="chart-sector" height="220"></canvas>
+      </div>
+      <div class="card">
+        <h3>Monthly Reports · मासिक रिपोर्ट</h3>
+        <canvas id="chart-month" height="220"></canvas>
+      </div>
+    </section>
+
+    <section class="grid cols-2 mt-2">
+      <div class="card">
+        <h3>Top Districts · प्रमुख जिले</h3>
+        <div id="district-bars"></div>
+      </div>
+      <div class="card">
+        <h3>🗺️ Live Problem Map</h3>
+        <div id="map" class="small"></div>
+      </div>
+    </section>
+
+    <section class="card mt-2">
+      <h3>🏆 Success Frontier — End-to-End Solved</h3>
+      <p class="muted">Problems that moved all the way from submission to deployment/closure.</p>
+      <div id="success-list"></div>
+    </section>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/impact.js"></script>
+</body>
+</html>

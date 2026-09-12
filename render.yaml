@@ -1,0 +1,27 @@
+# ============================================================
+# JanSetu – Render Blueprint (Free web service)
+# Deploy: "New +" > "Blueprint" > select this repo.
+# ============================================================
+services:
+  - type: web
+    name: jansetu
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        sync: false            # set a strong value in the Render dashboard
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false            # set your admin password in the Render dashboard
+      - key: SUPABASE_URL
+        sync: false            # your Supabase project URL
+      - key: SUPABASE_SERVICE_KEY
+        sync: false            # your Supabase service_role key
+      - key: SUPABASE_ANON_KEY
+        sync: false

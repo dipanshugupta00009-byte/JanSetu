@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Dashboard · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="spread">
+      <h1>🧭 My Dashboard · मेरा डैशबोर्ड</h1>
+      <a class="btn sm" href="/report.html">+ Report New Problem</a>
+    </div>
+
+    <div class="grid cols-3 mt-2" id="dash-cards"></div>
+
+    <section class="card mt-2">
+      <div class="spread">
+        <h3>📝 My Submissions · मेरी समस्याएँ</h3>
+        <span class="muted" id="dash-sub-count"></span>
+      </div>
+      <div id="dash-problems"></div>
+    </section>
+
+    <div class="grid cols-2 mt-2">
+      <section class="card">
+        <h3>👤 Profile · प्रोफ़ाइल</h3>
+        <div id="dash-profile"></div>
+      </section>
+      <section class="card">
+        <h3>🔑 Change Password</h3>
+        <form id="pw-form">
+          <div class="field"><label>Current Password</label><input type="password" id="pw-old" required /></div>
+          <div class="field"><label>New Password (min 8)</label><input type="password" id="pw-new" minlength="8" required /></div>
+          <button class="btn sm">Update Password</button>
+        </form>
+      </section>
+    </div>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/dashboard.js"></script>
+</body>
+</html>

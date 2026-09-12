@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Problem Bank · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="spread">
+      <h1>🏛️ Community Problem Bank</h1>
+      <a class="btn sm" href="/report.html">+ Report Problem</a>
+    </div>
+    <p class="muted">Browse real problems reported from across Jharkhand. Endorse those affecting you too — higher votes get priority in expert review.</p>
+
+    <div class="card mt-2">
+      <div class="form-row">
+        <div class="field">
+          <label>Search</label>
+          <input type="text" id="f-q" placeholder="Search title / description…" />
+        </div>
+        <div class="field">
+          <label>Category</label>
+          <select id="f-cat"><option value="">All categories</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>District</label>
+          <select id="f-dist"><option value="">All districts</option></select>
+        </div>
+        <div class="field">
+          <label>Sort</label>
+          <select id="f-sort">
+            <option value="recent">Most recent</option>
+            <option value="votes">Most endorsed</option>
+          </select>
+        </div>
+      </div>
+      <button id="f-apply" class="btn sm">Apply Filters</button>
+    </div>
+
+    <div class="grid mt-2" style="grid-template-columns: 1fr 1fr; gap:1rem">
+      <section id="problem-list"></section>
+      <div>
+        <div class="card"><h3>🗺️ Map View</h3><div id="map" class="small"></div></div>
+      </div>
+    </div>
+    <style>
+      @media (max-width: 900px) { #map { height: 260px !important; } }
+    </style>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/problems.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HEI Desk · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="spread">
+      <h1>🎓 HEI Desk · संस्थान डेस्क</h1>
+      <span class="muted">NEP 2020 · Experiential learning, community-engaged innovation</span>
+    </div>
+
+    <section class="card mt-2">
+      <h3>🏫 Institute Profile</h3>
+      <div id="inst-profile"></div>
+      <div class="form-row mt-2">
+        <div class="field"><label>Domain Expertise (comma separated) · विशेषज्ञता</label><input type="text" id="ip-domains" placeholder="e.g. water engineering, solar energy, agriculture" /></div>
+        <div class="field"><label>Registration No. · पंजीकरण संख्या</label><input type="text" id="ip-reg" /></div>
+      </div>
+      <button class="btn sm" id="ip-save">Save Profile</button>
+    </section>
+
+    <section class="card mt-2">
+      <h3>🧩 Adoptable Problem Bank · अपनाई जाने वाली समस्याएँ</h3>
+      <div id="inst-bank"></div>
+    </section>
+
+    <section class="card mt-2">
+      <div class="spread"><h3>🚀 My Projects · मेरी परियोजनाएँ</h3><a class="btn sm ghost" href="/projects.html">Open Kanban Board →</a></div>
+      <div id="inst-projects"></div>
+    </section>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/institution.js"></script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Industry Desk · JanSetu</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <div class="container">
+    <div class="spread">
+      <h1>🏭 Industry Desk · उद्योग डेस्क</h1>
+      <span class="muted">CSR co-funding · resources · IP & MoU collaboration</span>
+    </div>
+
+    <section class="card mt-2">
+      <h3>🏢 Company Profile</h3>
+      <div id="ind-profile"></div>
+      <div class="form-row mt-2">
+        <div class="field"><label>Technical Capabilities (comma separated) · क्षमताएँ</label><input type="text" id="ip-cap" placeholder="e.g. solar, IoT, water treatment" /></div>
+        <div class="field"><label>Funding Program · वित्त पोषण</label><input type="text" id="ip-fund" placeholder="e.g. CSR - Tata Steel Foundation" /></div>
+      </div>
+      <button class="btn sm" id="ip-save2">Save Profile</button>
+    </section>
+
+    <section class="card mt-2">
+      <h3>🤝 Active Projects — Join with Resources / Co-funding</h3>
+      <div id="ind-projects"></div>
+    </section>
+
+    <section class="card mt-2">
+      <h3>📨 My Collaboration Offers</h3>
+      <div id="ind-offers"></div>
+    </section>
+  </div>
+  <div id="app-footer"></div>
+  <script src="/js/common.js"></script>
+  <script src="/js/pages/industry.js"></script>
+</body>
+</html>
