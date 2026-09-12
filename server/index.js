@@ -114,6 +114,7 @@ const voteLimiter = rateLimit({
 app.use('/api', (req, res, next) => (req.path.startsWith('/auth') ? next() : apiLimiter(req, res, next)));
 app.use('/api/auth/login', loginLimiter);
 app.use('/api/auth/register', loginLimiter);
+app.use('/api/auth/send-otp', loginLimiter);
 app.use('/api/auth/admin-login', loginLimiter);
 app.use('/api/upload', uploadLimiter);
 app.post('/api/problems', submissionLimiter);

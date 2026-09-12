@@ -15,16 +15,20 @@ function getTransporter() {
   return transporter;
 }
 
-async function sendGmailOtp(email, otp) {
+async function sendEmailVerificationOtp(email, code) {
   const mailer = getTransporter();
-  if (!mailer) throw new Error('Gmail verification email is not configured on this server.');
+  if (!mailer) {
+    const error = new Error('Email verification is not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS and SMTP_FROM.');
+    error.code = 'SMTP_NOT_CONFIGURED';
+    throw error;
+  }
   await mailer.sendMail({
-    from: env.SMTP_FROM || env.SMTP_USER,
+    from: env.SMTP_FROM,
     to: email,
-    subject: 'JanSetu Gmail verification code',
-    text: `Your JanSetu verification code is ${otp}. It expires in 10 minutes. Do not share this code.`,
-    html: `<p>Your JanSetu verification code is:</p><p style="font-size:24px;font-weight:bold;letter-spacing:4px">${otp}</p><p>This code expires in 10 minutes. Do not share it.</p>`,
+    subject: 'JanSetu email verification code',
+    text: `Your JanSetu verification code is ${code}. It expires in 10 minutes. Do not share this code.`,
+    html: `<p>Your JanSetu verification code is:</p><p style="font-size:24px;font-weight:bold;letter-spacing:4px">${code}</p><p>This code expires in 10 minutes. Do not share it.</p>`,
   });
 }
 
-module.exports = { sendGmailOtp };
+module.exports = { sendEmailVerificationOtp };

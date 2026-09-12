@@ -13,26 +13,6 @@
     const me = await J.fetchMe();
     if (me.authed) { window.location.href = '/dashboard.html'; return; }
     await loadDistricts();
-    let gmailVerificationToken = '';
-
-    $('send-gmail-otp').addEventListener('click', async () => {
-      const email = $('rg-email').value.trim();
-      try {
-        const result = await J.api('/auth/gmail/request-otp', { method: 'POST', body: JSON.stringify({ email }) });
-        $('gmail-otp-field').classList.remove('hide');
-        $('gmail-verification-status').textContent = result.message;
-      } catch (err) { J.toast(err.message, true); }
-    });
-    $('verify-gmail-otp').addEventListener('click', async () => {
-      const email = $('rg-email').value.trim();
-      try {
-        const result = await J.api('/auth/gmail/verify-otp', { method: 'POST', body: JSON.stringify({ email, otp: $('rg-gmail-otp').value.trim() }) });
-        gmailVerificationToken = result.verificationToken;
-        $('gmail-verification-status').textContent = result.message;
-        $('verify-gmail-otp').disabled = true;
-        $('send-gmail-otp').disabled = true;
-      } catch (err) { J.toast(err.message, true); }
-    });
 
     $('rg-role').addEventListener('change', () => {
       const v = $('rg-role').value;
@@ -45,12 +25,14 @@
       const name = $('rg-name').value.trim();
       const email = $('rg-email').value.trim();
       const phone = $('rg-phone').value.trim();
+      const otp = $('rg-otp').value.trim();
       const org = $('rg-org').value.trim();
       const district = $('rg-district').value;
       const p1 = $('rg-password').value;
       const p2 = $('rg-password2').value;
       if (!name) return J.toast('Please enter your name.', true);
       if ((!email && !phone)) return J.toast('Email or mobile number is required.', true);
+      if (email && !otp) return J.toast('Please verify your email first.', true);
       if (role === 'citizen' && email && !/^[^\s@]+@gmail\.com$/i.test(email)) return J.toast('Citizen accounts require a Gmail address ending with @gmail.com.', true);
       if (((role === 'institution') || (role === 'industry')) && !org) return J.toast('Organisation name is required for this role.', true);
       if (p1 !== p2) return J.toast('Passwords do not match.', true);
@@ -58,13 +40,31 @@
       const btn = e.target.querySelector('button[type=submit]');
       btn.disabled = true; btn.textContent = 'Creating account�';
       try {
-        const data = await J.api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, phone, role, org_name: org, district, password: p1, language: J.getLang(), gmail_verification_token: gmailVerificationToken }) });
+        const data = await J.api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, phone, otp, role, org_name: org, district, password: p1, language: J.getLang() }) });
         J.invalidateMe();
         const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
         window.location.href = next;
       } catch (err) {
         btn.disabled = false; btn.textContent = 'Create Account � ???? ?????';
         J.toast(err.message, true);
+      }
+    });
+
+    $('send-otp').addEventListener('click', async () => {
+      const email = $('rg-email').value.trim();
+      const role = $('rg-role').value;
+      if (!email) return J.toast('Please enter your email address first.', true);
+      const button = $('send-otp');
+      button.disabled = true;
+      try {
+        const result = await J.api('/auth/send-otp', { method: 'POST', body: JSON.stringify({ email, role }) });
+        $('rg-otp-field').classList.remove('hide');
+        $('otp-status').textContent = result.message;
+        J.toast(result.message);
+      } catch (err) {
+        J.toast(err.message, true);
+      } finally {
+        button.disabled = false;
       }
     });
   }
