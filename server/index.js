@@ -36,10 +36,10 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.jsdelivr.net", "https://accounts.google.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://cdn.jsdelivr.net", "https://accounts.google.com", "https://accounts.google.com/gsi/client"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://accounts.google.com"],
       imgSrc: ["'self'", "data:", "blob:", "https://*.tile.openstreetmap.org", "https://unpkg.com", "https://*.googleusercontent.com"],
-      connectSrc: ["'self'", "https://accounts.google.com"],
+      connectSrc: ["'self'", "https://accounts.google.com", "https://accounts.google.com/gsi/"],
       fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
@@ -48,6 +48,7 @@ app.use(helmet({
       frameAncestors: ["'none'"],
     },
   },
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
   crossOriginEmbedderPolicy: false,
   crossOriginResourcePolicy: { policy: 'same-origin' },
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },

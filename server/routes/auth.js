@@ -48,14 +48,27 @@ router.post('/send-otp', asyncHandler(async (req, res) => {
   if (await store.findUserByEmail(email)) {
     return res.status(409).json({ error: 'An account with this email already exists. Please login.' });
   }
+
+  // Cooldown rate limit (30s per email)
+  const prev = emailChallenges.get(email);
+  if (prev && prev.sentAt && (Date.now() - prev.sentAt < 30000)) {
+    const remainingSec = Math.ceil((30000 - (Date.now() - prev.sentAt)) / 1000);
+    return res.status(429).json({ error: `Please wait ${remainingSec}s before requesting a new code.` });
+  }
+
   const code = String(crypto.randomInt(100000, 1000000));
-  emailChallenges.set(email, { hash: hashOtp(email, code), expiresAt: Date.now() + OTP_TTL_MS, attempts: 0 });
+  emailChallenges.set(email, { hash: hashOtp(email, code), expiresAt: Date.now() + OTP_TTL_MS, sentAt: Date.now(), attempts: 0 });
   try {
-    await sendEmailVerificationOtp(email, code);
+    const result = await sendEmailVerificationOtp(email, code);
+    if (result && result.devMode) {
+      return res.json({
+        message: `Verification code generated! (Dev code: ${code})`,
+        devOtp: code,
+      });
+    }
   } catch (e) {
     emailChallenges.delete(email);
-    if (e.code === 'SMTP_NOT_CONFIGURED') return res.status(503).json({ error: e.message });
-    throw e;
+    return res.status(500).json({ error: 'Failed to send verification code: ' + e.message });
   }
   res.json({ message: 'A verification code was sent to your email address.' });
 }));
@@ -69,16 +82,22 @@ async function verifyGoogleToken(credential) {
   try {
     res = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(credential), { headers: { Accept: 'application/json' } });
   } catch (e) {
-    throw new Error('Unable to reach Google for verification. Check your connection.');
+    throw new Error('Unable to reach Google for verification. Check your internet connection.');
   }
-  if (!res.ok) throw new Error('Google rejected the sign-in token. Please try again.');
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error((errBody && (errBody.error_description || errBody.error)) || 'Google rejected the sign-in token. Please try again.');
+  }
   const info = await res.json();
   const verified = info.email_verified === 'true' || info.email_verified === true || info.email_verified === 1;
 
   if (!info || !info.email || !verified) throw new Error('Google did not return a verified email address.');
-  if (env.GOOGLE_CLIENT_ID && info.aud && info.aud !== env.GOOGLE_CLIENT_ID) throw new Error('Google token audience mismatch. Refresh the page and try again.');
+  if (env.GOOGLE_CLIENT_ID) {
+    const validAud = info.aud === env.GOOGLE_CLIENT_ID || info.azp === env.GOOGLE_CLIENT_ID;
+    if (!validAud) throw new Error('Google token client mismatch. Please refresh the page and try again.');
+  }
   const exp = Number(info.exp || 0);
-  if (exp && exp * 1000 < Date.now()) throw new Error('Google sign-in token has expired.');
+  if (exp && exp * 1000 < Date.now()) throw new Error('Google sign-in token has expired. Please try again.');
   return info;
 }
 
@@ -119,11 +138,13 @@ router.post('/google', asyncHandler(async (req, res) => {
       });
     } catch (e) {
       if (e && e.code === '23505') {
-        return res.status(409).json({ error: 'An account with this Gmail address already exists. Please use the login form.' });
+        user = await store.findUserByEmail(email);
+        if (!user) return res.status(409).json({ error: 'An account with this Gmail address already exists. Please login.' });
+      } else {
+        throw e;
       }
-      throw e;
     }
-    audit(req, 'register_google', 'user', user.id, { email });
+    if (user) audit(req, 'register_google', 'user', user.id, { email });
   }
  
   await store.updateUser(user.id, { last_login: new Date().toISOString() });
@@ -151,25 +172,25 @@ router.post('/register', asyncHandler(async (req, res) => {
   const language = ['hi', 'en', 'sat'].includes(body.language) ? body.language : 'hi';
 
   if (!name) return res.status(400).json({ error: 'Please enter your full name.' });
-  if (!isEmail(email) && !isPhone(phone)) {
-    return res.status(400).json({ error: 'A valid email or mobile number is required.' });
+  if (!isEmail(email)) {
+    return res.status(400).json({ error: 'A valid email address is required.' });
   }
-  if (role === 'citizen' && email && !isGmail(email)) {
+  if (role === 'citizen' && !isGmail(email)) {
     return res.status(400).json({ error: 'Citizen accounts require a Gmail address ending with @gmail.com.' });
   }
   if (!isStrongPassword(password)) {
     return res.status(400).json({ error: 'Password must be at least 8 characters and contain letters and numbers/symbols.' });
   }
-  if (isEmail(email) && (await store.findUserByEmail(email))) {
+  if (await store.findUserByEmail(email)) {
     return res.status(409).json({ error: 'An account with this email already exists. Please login.' });
   }
   if (phone && (await store.findUserByPhone(phone))) {
-    return res.status(409).json({ error: 'An account with this mobile number already exists.' });
+    return res.status(409).json({ error: `An account with mobile number ${phone} already exists. Leave it blank or use another number.` });
   }
   if ((role === 'institution' || role === 'industry') && !org_name) {
     return res.status(400).json({ error: 'Organisation name is required for this role.' });
   }
-  if (email && !validOtp(email, String(body.otp || '').trim())) {
+  if (!validOtp(email, String(body.otp || '').trim())) {
     return res.status(400).json({ error: 'Please verify your email with the valid OTP before creating your account.' });
   }
 

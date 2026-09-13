@@ -19,6 +19,26 @@
       $('rg-org-field').classList.toggle('hide', !(v === 'institution' || v === 'industry'));
     });
 
+    let cooldownTimer = null;
+    function startCooldown(seconds) {
+      const button = $('send-otp');
+      button.disabled = true;
+      let remaining = seconds;
+      button.textContent = `Resend in ${remaining}s · पुनः भेजें (${remaining}s)`;
+      if (cooldownTimer) clearInterval(cooldownTimer);
+      cooldownTimer = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(cooldownTimer);
+          cooldownTimer = null;
+          button.disabled = false;
+          button.textContent = 'Send verification code · कोड भेजें';
+        } else {
+          button.textContent = `Resend in ${remaining}s · पुनः भेजें (${remaining}s)`;
+        }
+      }, 1000);
+    }
+
     $('reg-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const role = $('rg-role').value;
@@ -31,21 +51,21 @@
       const p1 = $('rg-password').value;
       const p2 = $('rg-password2').value;
       if (!name) return J.toast('Please enter your name.', true);
-      if ((!email && !phone)) return J.toast('Email or mobile number is required.', true);
-      if (email && !otp) return J.toast('Please verify your email first.', true);
-      if (role === 'citizen' && email && !/^[^\s@]+@gmail\.com$/i.test(email)) return J.toast('Citizen accounts require a Gmail address ending with @gmail.com.', true);
+      if (!email) return J.toast('Email address is required for all accounts.', true);
+      if (role === 'citizen' && !/^[^\s@]+@gmail\.com$/i.test(email)) return J.toast('Citizen accounts require a Gmail address ending with @gmail.com.', true);
+      if (!otp) return J.toast('Please click "Send verification code" and enter the 6-digit OTP code received.', true);
       if (((role === 'institution') || (role === 'industry')) && !org) return J.toast('Organisation name is required for this role.', true);
       if (p1 !== p2) return J.toast('Passwords do not match.', true);
       if (p1.length < 8) return J.toast('Password must be at least 8 characters.', true);
       const btn = e.target.querySelector('button[type=submit]');
-      btn.disabled = true; btn.textContent = 'Creating account�';
+      btn.disabled = true; btn.textContent = 'Creating account…';
       try {
         const data = await J.api('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, phone, otp, role, org_name: org, district, password: p1, language: J.getLang() }) });
         J.invalidateMe();
         const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
         window.location.href = next;
       } catch (err) {
-        btn.disabled = false; btn.textContent = 'Create Account � ???? ?????';
+        btn.disabled = false; btn.textContent = 'Create Account · खाता बनाएँ';
         J.toast(err.message, true);
       }
     });
@@ -54,21 +74,31 @@
       const email = $('rg-email').value.trim();
       const role = $('rg-role').value;
       if (!email) return J.toast('Please enter your email address first.', true);
+      if (role === 'citizen' && !/^[^\s@]+@gmail\.com$/i.test(email)) {
+        return J.toast('Citizen accounts require a Gmail address ending with @gmail.com.', true);
+      }
       const button = $('send-otp');
       button.disabled = true;
+      button.textContent = 'Sending code…';
       try {
         const result = await J.api('/auth/send-otp', { method: 'POST', body: JSON.stringify({ email, role }) });
         $('rg-otp-field').classList.remove('hide');
         $('otp-status').textContent = result.message;
+        if (result.devOtp) {
+          $('rg-otp').value = result.devOtp;
+        }
+        $('rg-otp').focus();
         J.toast(result.message);
+        startCooldown(30);
       } catch (err) {
-        J.toast(err.message, true);
-      } finally {
         button.disabled = false;
+        button.textContent = 'Send verification code · कोड भेजें';
+        J.toast(err.message, true);
       }
     });
   }
-// ---- Sign in with Google / Gmail (direct Gmail connection option) ----
+
+  // ---- Sign in with Google / Gmail (direct Gmail connection option) ----
   async function loadGsi() {
     if (document.getElementById('gsi-client')) return;
     await new Promise((resolve, reject) => {
@@ -83,16 +113,16 @@
   }
 
   async function handleGoogleCredential(response) {
-    const btnEl = $('google-btn');
-    const btn = btnEl ? btnEl.querySelector('button') : null;
-    if (btn) { btn.disabled = true; btn.textContent = 'Signing in�'; }
+    if (!response || !response.credential) {
+      return J.toast('Google sign-in did not return valid credentials. Please try again.', true);
+    }
+    J.toast('Signing in with Google…');
     try {
       const data = await J.api('/auth/google', { method: 'POST', body: JSON.stringify({ credential: response.credential, language: J.getLang() }) });
       J.invalidateMe();
       const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
       window.location.href = next;
     } catch (err) {
-      if (btn) { btn.disabled = false; }
       J.toast(err.message, true);
     }
   }

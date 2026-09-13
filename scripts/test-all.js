@@ -209,13 +209,30 @@ async function run() {
     });
     assert.strictEqual(weak2.status, 400, 'Password without digits/symbols must fail');
 
-    // Strong password
-    const strong = await fetch(BASE + '/api/auth/register', {
+    // Registration without OTP must fail
+    const noOtp = await fetch(BASE + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'Security Tested User', email: 'secuser' + Date.now() + '@gmail.com', password: 'StrongPass@2026' }),
     });
-    assert.strictEqual(strong.status, 201, 'Strong password registration must succeed');
+    assert.strictEqual(noOtp.status, 400, 'Registration without OTP must fail');
+
+    // Send OTP and register with strong password
+    const secEmail = 'secuser' + Date.now() + '@gmail.com';
+    const otpRes = await fetch(BASE + '/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: secEmail, role: 'citizen' }),
+    });
+    assert.strictEqual(otpRes.status, 200, 'Send OTP must succeed');
+    const otpData = await otpRes.json();
+
+    const strong = await fetch(BASE + '/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Security Tested User', email: secEmail, otp: otpData.devOtp, password: 'StrongPass@2026' }),
+    });
+    assert.strictEqual(strong.status, 201, 'Strong password registration with valid OTP must succeed');
   });
 
   await test('Citizen Registration Requires Gmail Address', async () => {
@@ -226,12 +243,21 @@ async function run() {
     });
     assert.strictEqual(nonGmail.status, 400, 'Citizen registration with a non-Gmail address must fail');
 
+    const evalEmail = 'evaluator' + Date.now() + '@example.com';
+    const evalOtp = await fetch(BASE + '/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: evalEmail, role: 'evaluator' }),
+    });
+    assert.strictEqual(evalOtp.status, 200, 'Send OTP for evaluator must succeed');
+    const evalData = await evalOtp.json();
+
     const evaluator = await fetch(BASE + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Non Gmail Evaluator', role: 'evaluator', email: 'evaluator' + Date.now() + '@example.com', password: 'StrongPass@2026' }),
+      body: JSON.stringify({ name: 'Non Gmail Evaluator', role: 'evaluator', email: evalEmail, otp: evalData.devOtp, password: 'StrongPass@2026' }),
     });
-    assert.strictEqual(evaluator.status, 201, 'Non-citizen registration may use a non-Gmail address');
+    assert.strictEqual(evaluator.status, 201, 'Non-citizen registration may use a non-Gmail address with OTP');
   });
 
   await test('Security Audit Trails: Failed Logins Recorded in Audit Logs', async () => {

@@ -32,19 +32,20 @@
         </div>
         <div class="form-row">
           <div class="field">
-            <label>Email</label>
-            <input type="email" id="rg-email" autocomplete="email" />
-            <button type="button" class="btn sm ghost mt-1" id="send-otp">Send verification code</button>
-            <small class="muted" id="otp-status"></small>
+            <label class="req">Email · ईमेल</label>
+            <input type="email" id="rg-email" placeholder="you@gmail.com" autocomplete="email" required />
+            <button type="button" class="btn sm ghost mt-1" id="send-otp">Send verification code · कोड भेजें</button>
+            <div class="mt-1"><small class="muted" id="otp-status"></small></div>
           </div>
           <div class="field">
-            <label>Mobile Number</label>
+            <label>Mobile Number (Optional) · मोबाइल नंबर</label>
             <input type="tel" id="rg-phone" placeholder="10-digit mobile" />
           </div>
         </div>
         <div class="field hide" id="rg-otp-field">
-          <label class="req">Email verification code</label>
-          <input type="text" id="rg-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" />
+          <label class="req">Email verification code (6-digit OTP) · सत्यापन कोड</label>
+          <input type="text" id="rg-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="Enter 6-digit OTP" style="letter-spacing:3px; font-weight:700" />
+          <div class="hint" id="otp-hint">Enter the 6-digit OTP code received via email.</div>
         </div>
         <div class="field">
           <label>District · जिला</label>

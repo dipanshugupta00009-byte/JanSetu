@@ -18,17 +18,35 @@ function getTransporter() {
 async function sendEmailVerificationOtp(email, code) {
   const mailer = getTransporter();
   if (!mailer) {
-    const error = new Error('Email verification is not configured. Set SMTP_HOST, SMTP_USER, SMTP_PASS and SMTP_FROM.');
-    error.code = 'SMTP_NOT_CONFIGURED';
-    throw error;
+    console.log('\n' + '='.repeat(60));
+    console.log(`[JanSetu Email OTP - DEV FALLBACK]`);
+    console.log(`To: ${email}`);
+    console.log(`Verification Code: >>> ${code} <<<`);
+    console.log(`(Configure SMTP_USER & SMTP_PASS in .env to send real emails)`);
+    console.log('='.repeat(60) + '\n');
+    return { sent: false, devMode: true, code };
   }
-  await mailer.sendMail({
-    from: env.SMTP_FROM,
-    to: email,
-    subject: 'JanSetu email verification code',
-    text: `Your JanSetu verification code is ${code}. It expires in 10 minutes. Do not share this code.`,
-    html: `<p>Your JanSetu verification code is:</p><p style="font-size:24px;font-weight:bold;letter-spacing:4px">${code}</p><p>This code expires in 10 minutes. Do not share it.</p>`,
-  });
+  try {
+    await mailer.sendMail({
+      from: env.SMTP_FROM || env.SMTP_USER,
+      to: email,
+      subject: 'JanSetu email verification code',
+      text: `Your JanSetu verification code is ${code}. It expires in 10 minutes. Do not share this code.`,
+      html: `<p>Your JanSetu verification code is:</p><p style="font-size:28px;font-weight:bold;letter-spacing:6px;color:#1e40af">${code}</p><p>This code expires in 10 minutes. Do not share it.</p>`,
+    });
+    return { sent: true, devMode: false, code };
+  } catch (err) {
+    console.error('[SMTP ERROR] Failed to send email via SMTP:', err.message);
+    if (!env.IS_PROD) {
+      console.log('\n' + '='.repeat(60));
+      console.log(`[JanSetu Email OTP - DEV FALLBACK (SMTP Error)]`);
+      console.log(`To: ${email}`);
+      console.log(`Verification Code: >>> ${code} <<<`);
+      console.log('='.repeat(60) + '\n');
+      return { sent: false, devMode: true, code, smtpError: err.message };
+    }
+    throw err;
+  }
 }
 
-module.exports = { sendEmailVerificationOtp };
+module.exports = { sendEmailVerificationOtp, getTransporter };

@@ -10,19 +10,20 @@
     $('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = e.target.querySelector('button[type=submit]');
-      btn.disabled = true; btn.textContent = 'Logging in�';
+      btn.disabled = true; btn.textContent = 'Logging in…';
       try {
         const data = await J.api('/auth/login', { method: 'POST', body: JSON.stringify({ login: $('lg-login').value.trim(), password: $('lg-password').value }) });
         J.invalidateMe();
         const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
         window.location.href = next;
       } catch (err) {
-        btn.disabled = false; btn.textContent = 'Login � ?????';
+        btn.disabled = false; btn.textContent = 'Login · लॉगिन';
         J.toast(err.message, true);
       }
     });
   }
-// ---- Sign in with Google / Gmail (direct Gmail connection option) ----
+
+  // ---- Sign in with Google / Gmail (direct Gmail connection option) ----
   async function loadGsi() {
     if (document.getElementById('gsi-client')) return;
     await new Promise((resolve, reject) => {
@@ -37,16 +38,16 @@
   }
 
   async function handleGoogleCredential(response) {
-    const btnEl = $('google-btn');
-    const btn = btnEl ? btnEl.querySelector('button') : null;
-    if (btn) { btn.disabled = true; btn.textContent = 'Signing in�'; }
+    if (!response || !response.credential) {
+      return J.toast('Google sign-in did not return valid credentials. Please try again.', true);
+    }
+    J.toast('Signing in with Google…');
     try {
       const data = await J.api('/auth/google', { method: 'POST', body: JSON.stringify({ credential: response.credential, language: J.getLang() }) });
       J.invalidateMe();
       const next = new URLSearchParams(window.location.search).get('next') || '/dashboard.html';
       window.location.href = next;
     } catch (err) {
-      if (btn) { btn.disabled = false; }
       J.toast(err.message, true);
     }
   }
