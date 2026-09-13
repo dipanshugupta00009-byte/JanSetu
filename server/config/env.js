@@ -26,6 +26,11 @@ const env = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',
   APP_URL: process.env.APP_URL || `http://localhost:${parseInt(process.env.PORT, 10) || 3000}`,
 
+  AI_API_KEY: process.env.AI_API_KEY || '',
+  AI_BASE_URL: (process.env.AI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, ''),
+  AI_MODEL: process.env.AI_MODEL || 'gpt-4o-mini',
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
+
   SMTP_HOST: process.env.SMTP_HOST || '',
   SMTP_PORT: parseInt(process.env.SMTP_PORT, 10) || 587,
   SMTP_SECURE: String(process.env.SMTP_SECURE || '').toLowerCase() === 'true',

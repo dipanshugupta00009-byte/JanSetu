@@ -106,7 +106,7 @@ function csrfProtect(req, res, next) {
     return next();
   }
   // Allow initial unauthenticated login and registration
-  if (req.baseUrl === '/api/auth' && ['/login', '/register', '/send-otp', '/admin-login'].includes(req.path)) {
+  if (req.baseUrl === '/api/auth' && ['/login', '/register', '/send-otp', '/admin-login', '/google'].includes(req.path)) {
     if (!cookie || !header || header === cookie) return next();
   }
   if (!header || !cookie || header !== cookie) {

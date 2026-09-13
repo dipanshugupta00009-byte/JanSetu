@@ -91,6 +91,25 @@
     rec.onend = () => { setTimeout(() => { $('voice-status').textContent = ''; }, 4000); };
     rec.start();
   }
+  async function improveWithAi() {
+    const button = $('ai-btn');
+    const status = $('ai-status');
+    if ($('pv-desc').value.trim().length < 10) return J.toast('Describe the problem briefly before using AI.', true);
+    button.disabled = true; button.textContent = 'Improving…'; status.textContent = '';
+    try {
+      const result = await J.api('/ai/assist', { method: 'POST', body: JSON.stringify({
+        title: $('pv-title').value, description: $('pv-desc').value, category: $('pv-category').value,
+      }) });
+      $('pv-title').value = result.title;
+      $('pv-desc').value = result.description;
+      if (result.tags.length) $('pv-tags').value = result.tags.join(', ');
+      status.textContent = '✓ Draft improved';
+    } catch (e) {
+      J.toast(e.message, true);
+    } finally {
+      button.disabled = false; button.textContent = '✨ Improve with AI';
+    }
+  }
   async function submit(e) {
     e.preventDefault();
     const title = $('pv-title').value.trim();
@@ -133,6 +152,7 @@
     $('geo-autodetect').addEventListener('click', autoDetect);
     $('geo-reset').addEventListener('click', () => { if (marker) { map.removeLayer(marker); marker = null; } $('pv-lat').value = ''; $('pv-lng').value = ''; });
     $('voice-btn').addEventListener('click', voiceInput);
+    $('ai-btn').addEventListener('click', improveWithAi);
     $('pv-files').addEventListener('change', (e) => handleFiles([...e.target.files]));
   }
   document.addEventListener('DOMContentLoaded', init);

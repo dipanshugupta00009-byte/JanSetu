@@ -24,6 +24,7 @@ const adminRoutes = require('./routes/admin');
 const dashboardRoutes = require('./routes/dashboard');
 const publicRoutes = require('./routes/public');
 const uploadRoutes = require('./routes/uploads');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 app.disable('x-powered-by');
@@ -144,6 +145,7 @@ app.use('/api/admin', authMw.csrfProtect, adminRoutes);
 app.use('/api/dashboard', authMw.csrfProtect, dashboardRoutes);
 app.use('/api/public', publicRoutes); // public read-only (no CSRF needed)
 app.use('/api/upload', authMw.csrfProtect, uploadRoutes);
+app.use('/api/ai', authMw.csrfProtect, aiRoutes);
 
 // ---------------------------------------------------------------------------
 // Health check (Render needs this)
