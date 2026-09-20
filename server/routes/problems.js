@@ -89,11 +89,19 @@ router.post('/', authMw.attachUser, authMw.requireAnyRole, asyncHandler(async (r
     media: Array.isArray(body.media) ? body.media.map((m) => sanitizeText(m, 500)).slice(0, 8) : [],
     language: body.language || 'en',
   });
+  if (problem && problem.is_duplicate) {
+    audit(req, 'problem_duplicate_count', 'problem', problem.problem.id, { original: problem.problem.public_id, title });
+    return res.status(200).json({
+      is_duplicate: true,
+      duplicate_of: { public_id: problem.problem.public_id, title: problem.problem.title },
+      problem: problem.problem,
+      message: problem.message,
+    });
+  }
   audit(req, 'problem_submit', 'problem', problem.id, { title });
-  const dup = problem.duplicate_of ? await store.findProblemById(problem.duplicate_of) : null;
   res.status(201).json({
+    is_duplicate: false,
     problem,
-    duplicate_of: dup ? { public_id: dup.public_id, title: dup.title } : null,
     message: 'Problem submitted successfully for review.',
   });
 }));

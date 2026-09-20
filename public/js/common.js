@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    JanSetu - shared frontend utilities (API, i18n, auth, UI)
    ============================================================ */
 (function () {
@@ -80,7 +80,19 @@
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   J.esc = esc;
 
-  const STATUS_LABELS = { submitted: 'Submitted', under_review: 'Under Review', info_needed: 'More Info Needed', approved: 'Approved', rejected: 'Rejected', escalated: 'Escalated', assigned: 'Assigned', in_progress: 'In Progress', piloted: 'Piloted', deployed: 'Deployed', closed: 'Closed' };
+  const STATUS_LABELS = {
+    submitted: 'Not Assigned Yet (Under Review)',
+    under_review: 'Under Review',
+    info_needed: 'More Info Needed',
+    approved: 'Wait for Selection',
+    rejected: 'Rejected',
+    escalated: 'Escalated',
+    assigned: 'Assigned (Department Assigned)',
+    in_progress: 'Propose Solution (In Progress)',
+    piloted: 'Student Build & Pilot',
+    deployed: 'Assign Completed (Deployed)',
+    closed: 'Completed (Mark as Resolved)'
+  };
   J.statusLabel = (s) => STATUS_LABELS[s] || String(s || '').replace(/_/g, ' ');
   J.statusBadge = (s) => '<span class="badge ' + esc(s) + '">' + esc(J.statusLabel(s)) + '</span>';
 

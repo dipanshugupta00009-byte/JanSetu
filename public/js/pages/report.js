@@ -1,4 +1,4 @@
-﻿/* JanSetu - report problem page (geotag, media, voice, draft) */
+/* JanSetu - report problem page (geotag, media, voice, draft) */
 (function () {
   const J = window.JanSetu;
   let map = null, marker = null, uploadedMedia = [];
@@ -102,14 +102,20 @@
       }) });
       $('pv-title').value = result.title;
       $('pv-desc').value = result.description;
-      if (result.tags.length) $('pv-tags').value = result.tags.join(', ');
-      status.textContent = '✓ Draft improved';
+      if (result.category) $('pv-category').value = result.category;
+      if (result.tags && result.tags.length) $('pv-tags').value = result.tags.join(', ');
+      if (result.extracted_location && !$('pv-village').value) {
+        $('pv-village').value = result.extracted_location;
+      }
+      status.textContent = '✓ AI Categorized: ' + J.esc(result.category || 'General');
+      J.toast('AI enhanced description and auto-selected category!');
     } catch (e) {
       J.toast(e.message, true);
     } finally {
       button.disabled = false; button.textContent = '✨ Improve with AI';
     }
   }
+
   async function submit(e) {
     e.preventDefault();
     const title = $('pv-title').value.trim();
@@ -131,11 +137,14 @@
         is_anonymous: $('pv-anonymous').checked, language: J.getLang(),
       })});
       localStorage.removeItem(draftKey);
-      if (data.duplicate_of) {
-        $('pv-similar').innerHTML = '<div class="alert info">⚠️ A very similar problem already exists: <b>' + J.esc(data.duplicate_of.title) + '</b> (<b>' + J.esc(data.duplicate_of.public_id) + '</b>). Your report has been linked to it.</div>';
+      if (data.is_duplicate) {
+        $('pv-similar').innerHTML = '<div class="alert info">⚠️ <b>Deduplication Match (SIH Workflow):</b> A similar complaint already exists: <b>' + J.esc(data.duplicate_of.title) + '</b> (<b>' + J.esc(data.duplicate_of.public_id) + '</b>).<br/><b>Your report was added as an endorsement count (+1) to the existing complaint!</b></div>';
+        J.toast('Duplicate found! Added count (+1) to existing issue ' + data.duplicate_of.public_id);
+        setTimeout(() => { window.location.href = '/track.html?id=' + encodeURIComponent(data.problem.public_id); }, 2200);
+      } else {
+        J.toast(data.message || 'Submitted! 🎉');
+        setTimeout(() => { window.location.href = '/track.html?id=' + encodeURIComponent(data.problem.public_id); }, 1400);
       }
-      J.toast(data.message || 'Submitted! 🎉');
-      setTimeout(() => { window.location.href = '/track.html?id=' + encodeURIComponent(data.problem.public_id); }, 1400);
     } catch (err) {
       submitBtn.disabled = false; submitBtn.textContent = '🚀 Submit for Review';
       J.toast(err.message, true);

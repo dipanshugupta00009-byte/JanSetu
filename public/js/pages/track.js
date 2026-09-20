@@ -1,4 +1,4 @@
-﻿/* JanSetu - track status page */
+/* JanSetu - track status page */
 (function () {
   const J = window.JanSetu;
   const $ = (id) => document.getElementById(id);
@@ -9,17 +9,17 @@
     const idx = FLOW.indexOf(problem.status);
     const active = idx >= 0 ? idx : (problem.status === 'rejected' ? 3 : (problem.status === 'escalated' ? 2 : 0));
     const steps = [
-      { s: 'submitted', l: 'Submitted' },
-      { s: 'under_review', l: 'Arrived at Review' },
-      { s: 'approved', l: 'Approved' },
-      { s: 'assigned', l: 'Assigned to Team' },
-      { s: 'in_progress', l: 'Solution in Progress' },
-      { s: 'piloted', l: 'Pilot' },
-      { s: 'deployed', l: 'Deployed' },
-      { s: 'closed', l: 'Closed / Resolved' },
+      { s: 'submitted', l: 'Citizen Submits Issue' },
+      { s: 'under_review', l: 'Not Assigned Yet (Under Review)' },
+      { s: 'approved', l: 'Wait for Selection (Approved)' },
+      { s: 'assigned', l: 'Assigned (Department Assigned)' },
+      { s: 'in_progress', l: 'Propose Solution (Plan Action)' },
+      { s: 'piloted', l: 'Student Build & Implement (Pilot)' },
+      { s: 'deployed', l: 'Assign Completed (Deployed)' },
+      { s: 'closed', l: 'Completed (Mark as Resolved)' },
     ];
-    return '<h3>🏁 Lifecycle Status</h3><ul class="timeline">' + steps.map((st, i) =>
-      '<li class="' + (i <= active && problem.status !== 'rejected' ? 'done' : '') + '"><b>' + J.statusLabel(st.s) + '</b><div class="tl-time">' + (i <= active ? 'Reached' : 'Pending') + '</div></li>'
+    return '<h3>🏁 SIH Workflow Lifecycle Status</h3><ul class="timeline">' + steps.map((st, i) =>
+      '<li class="' + (i <= active && problem.status !== 'rejected' ? 'done' : '') + '"><b>' + J.esc(st.l) + '</b><div class="tl-time">' + (i <= active ? 'Reached ✓' : 'Pending') + '</div></li>'
     ).join('') + '</ul>';
   }
 

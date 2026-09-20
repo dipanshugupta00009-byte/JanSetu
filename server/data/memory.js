@@ -224,7 +224,8 @@ async function findUserByPhone(phone) {
 async function findUserByLogin(login) {
   const l = String(login || '').toLowerCase().trim();
   if (!l) return null;
-  if (l.includes('@')) return findUserByEmail(l);
+  const user = await findUserByEmail(l);
+  if (user) return user;
   return findUserByPhone(l);
 }
 
@@ -270,7 +271,20 @@ async function createProblem(data) {
   let duplicate = data.duplicate_of || null;
   if (!duplicate) {
     const dup = await findSimilarProblem(data.title);
-    if (dup) duplicate = dup.id;
+    if (dup) {
+      // SIH Flowchart: Duplicate? Yes -> Add Count to Previous One
+      if (data.user_id) {
+        try { await addVote(dup.id, data.user_id); } catch (e) {}
+      } else {
+        dup.votes = (dup.votes || 0) + 1;
+      }
+      return {
+        is_duplicate: true,
+        duplicate_of: dup,
+        problem: dup,
+        message: `A similar problem was already reported (${dup.public_id || 'existing'}). Your submission has been added as an endorsement count (+1) to the existing complaint!`,
+      };
+    }
   }
   problemSeq += 1;
   const problem = {

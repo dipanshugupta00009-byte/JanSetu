@@ -1,4 +1,4 @@
-﻿/**
+/**
  * JanSetu – Supabase (Postgres) store.
  * Implements the same interface as memory.js against the schema in
  * supabase/schema.sql. Uses the server-side service key, so Row Level
@@ -178,7 +178,8 @@ async function findUserByPhone(phone) {
 async function findUserByLogin(login) {
   const l = String(login || '').trim();
   if (!l) return null;
-  if (l.includes('@')) return findUserByEmail(l);
+  const byEmail = await findUserByEmail(l);
+  if (byEmail) return byEmail;
   return findUserByPhone(l);
 }
 async function findUserById(id) {
@@ -204,7 +205,21 @@ async function createProblem(data) {
   let duplicate = data.duplicate_of || null;
   if (!duplicate) {
     const similar = await findSimilarProblem(data.title);
-    if (similar) duplicate = similar.id;
+    if (similar) {
+      // SIH Flowchart: Duplicate? Yes -> Add Count to Previous One
+      if (data.user_id) {
+        try { await addVote(similar.id, data.user_id); } catch (e) {}
+      } else {
+        await client.from(TABLES.problems).update({ votes: (similar.votes || 0) + 1 }).eq('id', similar.id);
+      }
+      const updated = await findProblemById(similar.id);
+      return {
+        is_duplicate: true,
+        duplicate_of: similar,
+        problem: updated,
+        message: `A similar problem was already reported (${similar.public_id || 'existing'}). Your submission has been added as an endorsement count (+1) to the existing complaint!`,
+      };
+    }
   }
   const { count } = await client.from(TABLES.problems).select('*', { count: 'exact', head: true });
   const publicId = makePublicId('JST', (count || 0) + 1);
