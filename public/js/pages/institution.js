@@ -10,7 +10,7 @@
       '<p class="pi-desc">' + J.esc((p.description || '').slice(0, 240)) + '…</p>' +
       '<div class="pi-meta"><span>📍 ' + J.esc(p.district || '—') + '</span><span>👍 ' + (p.votes || 0) + '</span><span>Severity ' + (p.severity || 0) + '/100</span></div>' +
       '<div class="flex mt-1">' +
-        '<button class="btn sm" data-adopt="' + p.id + '">🤝 Adopt this Problem</button>' +
+        '<button class="btn sm" data-adopt="' + p.id + '">🤝 Pick & Propose Solution</button>' +
         '<a class="btn sm ghost" href="/track.html?id=' + encodeURIComponent(p.public_id) + '">Details</a>' +
       '</div></div>';
   }
@@ -46,11 +46,11 @@
   async function adopt(e) {
     const btn = e.currentTarget;
     btn.disabled = true;
-    const team = prompt('Name student team members (comma separated):', '');
+    const team = prompt('Add student team members (comma separated):', '');
     try {
       const data = await J.api('/institution/adopt/' + encodeURIComponent(btn.dataset.adopt), { method: 'POST', body: JSON.stringify({ team: team || '' }) });
-      J.toast(data.message || 'Adopted!');
-      loadBank(); loadProjects();
+      J.toast('Problem picked. Open the project to submit the solution proposal.');
+      window.location.href = '/projects.html?id=' + encodeURIComponent(data.project.id);
     } catch (err) { btn.disabled = false; J.toast(err.message, true); }
   }
 
