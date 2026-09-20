@@ -3,6 +3,11 @@
   const J = window.JanSetu;
   const $ = (id) => document.getElementById(id);
 
+  // ---- Gmail-only rule: every registration email must end with @gmail.com ----
+  const GMAIL_RE = /^[^\s@]+@gmail\.com$/i;
+  const GMAIL_ONLY_MSG = 'Only Gmail addresses ending with @gmail.com are accepted.';
+  function isGmailAddress(email) { return GMAIL_RE.test(String(email || '').trim()); }
+
   async function loadDistricts() {
     try { const d = await J.api('/problems/options'); $('rg-district').innerHTML = '<option value="">Select district</option>' + d.districts.map((x) => '<option value="' + J.esc(x) + '">' + J.esc(x) + '</option>').join(''); }
     catch (e) {}
@@ -52,7 +57,7 @@
       const p2 = $('rg-password2').value;
       if (!name) return J.toast('Please enter your name.', true);
       if (!email) return J.toast('Email address is required for all accounts.', true);
-      if (role === 'citizen' && !/^[^\s@]+@gmail\.com$/i.test(email)) return J.toast('Citizen accounts require a Gmail address ending with @gmail.com.', true);
+      if (!isGmailAddress(email)) return J.toast(GMAIL_ONLY_MSG, true);
       if (!otp) return J.toast('Please click "Send verification code" and enter the 6-digit OTP code received.', true);
       if (((role === 'institution') || (role === 'industry')) && !org) return J.toast('Organisation name is required for this role.', true);
       if (p1 !== p2) return J.toast('Passwords do not match.', true);
@@ -74,8 +79,8 @@
       const email = $('rg-email').value.trim();
       const role = $('rg-role').value;
       if (!email) return J.toast('Please enter your email address first.', true);
-      if (role === 'citizen' && !/^[^\s@]+@gmail\.com$/i.test(email)) {
-        return J.toast('Citizen accounts require a Gmail address ending with @gmail.com.', true);
+      if (!isGmailAddress(email)) {
+        return J.toast(GMAIL_ONLY_MSG, true);
       }
       const button = $('send-otp');
       button.disabled = true;

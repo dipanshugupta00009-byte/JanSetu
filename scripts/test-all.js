@@ -235,7 +235,7 @@ async function run() {
     assert.strictEqual(strong.status, 201, 'Strong password registration with valid OTP must succeed');
   });
 
-  await test('Citizen Registration Requires Gmail Address', async () => {
+  await test('Registration Requires a Gmail Address for Every Role', async () => {
     const nonGmail = await fetch(BASE + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -243,21 +243,38 @@ async function run() {
     });
     assert.strictEqual(nonGmail.status, 400, 'Citizen registration with a non-Gmail address must fail');
 
+    // Non-Gmail addresses must be rejected for every role, not just citizens
     const evalEmail = 'evaluator' + Date.now() + '@example.com';
     const evalOtp = await fetch(BASE + '/api/auth/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: evalEmail, role: 'evaluator' }),
     });
-    assert.strictEqual(evalOtp.status, 200, 'Send OTP for evaluator must succeed');
-    const evalData = await evalOtp.json();
+    assert.strictEqual(evalOtp.status, 400, 'Send OTP for a non-Gmail evaluator address must fail');
+
+    const nonGmailEvaluator = await fetch(BASE + '/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Non Gmail Evaluator', role: 'evaluator', email: evalEmail, otp: '123456', password: 'StrongPass@2026' }),
+    });
+    assert.strictEqual(nonGmailEvaluator.status, 400, 'Evaluator registration with a non-Gmail address must fail');
+
+    // The same evaluator role still works with a Gmail address
+    const gmailEvaluator = 'evaluator' + Date.now() + '@gmail.com';
+    const gmailOtp = await fetch(BASE + '/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: gmailEvaluator, role: 'evaluator' }),
+    });
+    assert.strictEqual(gmailOtp.status, 200, 'Send OTP for a Gmail evaluator address must succeed');
+    const gmailData = await gmailOtp.json();
 
     const evaluator = await fetch(BASE + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: 'Non Gmail Evaluator', role: 'evaluator', email: evalEmail, otp: evalData.devOtp, password: 'StrongPass@2026' }),
+      body: JSON.stringify({ name: 'Gmail Evaluator', role: 'evaluator', email: gmailEvaluator, otp: gmailData.devOtp, password: 'StrongPass@2026' }),
     });
-    assert.strictEqual(evaluator.status, 201, 'Non-citizen registration may use a non-Gmail address with OTP');
+    assert.strictEqual(evaluator.status, 201, 'Evaluator registration with a Gmail address and OTP must succeed');
   });
 
   await test('Security Audit Trails: Failed Logins Recorded in Audit Logs', async () => {

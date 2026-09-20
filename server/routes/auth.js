@@ -16,6 +16,9 @@ const router = express.Router();
 const emailChallenges = new Map();
 const OTP_TTL_MS = 10 * 60 * 1000;
 
+// Gmail-only rule: every account email must end with @gmail.com
+const GMAIL_ONLY_ERROR = 'Only Gmail addresses ending with @gmail.com are accepted.';
+
 function hashOtp(email, code) {
   return crypto.createHash('sha256').update(email + ':' + code + ':' + env.JWT_SECRET).digest('hex');
 }
@@ -42,8 +45,8 @@ router.get('/google/config', (req, res) => {
 router.post('/send-otp', asyncHandler(async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   if (!isEmail(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
-  if (req.body.role === 'citizen' && !isGmail(email)) {
-    return res.status(400).json({ error: 'Citizen accounts require a Gmail address ending with @gmail.com.' });
+  if (!isGmail(email)) {
+    return res.status(400).json({ error: GMAIL_ONLY_ERROR });
   }
   if (await store.findUserByEmail(email)) {
     return res.status(409).json({ error: 'An account with this email already exists. Please login.' });
@@ -116,7 +119,7 @@ router.post('/google', asyncHandler(async (req, res) => {
  
   const email = String(info.email || '').toLowerCase().trim();
   if (!isEmail(email)) return res.status(400).json({ error: 'Google returned an invalid email address.' });
-  if (!isGmail(email)) return res.status(400).json({ error: 'Citizen accounts require a Gmail address ending with @gmail.com.' });
+  if (!isGmail(email)) return res.status(400).json({ error: GMAIL_ONLY_ERROR });
  
   const name = sanitizeText(info.name || email.split('@')[0] || 'Google User', 120);
   let user = await store.findUserByEmail(email);
@@ -175,8 +178,8 @@ router.post('/register', asyncHandler(async (req, res) => {
   if (!isEmail(email)) {
     return res.status(400).json({ error: 'A valid email address is required.' });
   }
-  if (role === 'citizen' && !isGmail(email)) {
-    return res.status(400).json({ error: 'Citizen accounts require a Gmail address ending with @gmail.com.' });
+  if (!isGmail(email)) {
+    return res.status(400).json({ error: GMAIL_ONLY_ERROR });
   }
   if (!isStrongPassword(password)) {
     return res.status(400).json({ error: 'Password must be at least 8 characters and contain letters and numbers/symbols.' });
