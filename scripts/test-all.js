@@ -392,15 +392,25 @@ async function run() {
     assert.ok(bank.length > 0, 'Adoptable bank has approved problems');
     const targetProblem = bank[0];
 
-    // 2. Adopt problem into project
+    // 2. Pick the problem statement AND submit the solution proposal in one step
     const adoptRes = await fetch(BASE + '/api/institution/adopt/' + targetProblem.id, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Cookie': heiCookies, 'X-CSRF-Token': csrf },
-      body: JSON.stringify({ team: ['Rohan (B.Tech EE)', 'Anjali (M.Tech Energy)'] }),
+      body: JSON.stringify({
+        title: 'Solar hybrid water pumping for Bandgaon handpump',
+        team: ['Rohan (B.Tech EE)', 'Anjali (M.Tech Energy)'],
+        approach: 'Install a solar-powered pump with a storage tank and IoT level monitoring for the community handpump.',
+        impact: 'About 250 families get clean drinking water within the village.',
+        resources: '2kW solar panels, inverter, tank, ₹1.2 lakh, 12 weeks.',
+        risks: 'Panchayat land permission and monsoon installation window.',
+      }),
     });
     assert.strictEqual(adoptRes.status, 201);
     const adoptData = await adoptRes.json();
     const projectId = adoptData.project.id;
+    assert.strictEqual(adoptData.milestone.type, 'proposal', 'Solution proposal stored as first milestone');
+    assert.ok(adoptData.project.team.length >= 1, 'Student team saved on the project');
+    assert.ok(adoptData.project.milestones.some((m) => m.type === 'proposal'), 'Proposal visible on the project');
 
     // 3. Post milestone
     const msRes = await fetch(BASE + '/api/projects/' + projectId + '/milestones', {

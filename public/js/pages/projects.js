@@ -111,19 +111,19 @@
 
       // Milestones
       html += '<div class="card mb-2">';
-      html += '<div class="spread mb-1"><div><h4>🎯 Solution Proposal & Milestones</h4><p class="muted">Start with a clear proposal: explain your approach, expected impact, resources, and delivery plan.</p></div><button class="btn sm ghost" id="toggle-milestone-form">+ Submit Proposal</button></div>';
+      html += '<div class="spread mb-1"><div><h4>🎯 Solution Proposal & Progress Milestones</h4><p class="muted">The solution proposal is submitted together with picking the problem statement in the HEI Desk. Use this section for later milestones (prototype, pilot, final report).</p></div><button class="btn sm ghost" id="toggle-milestone-form">+ Add Milestone / Update</button></div>';
       html += '<form id="milestone-form" class="hide mb-2 card tint">';
       html += '<div class="form-row">';
-      html += '<div class="field"><label class="req">Proposal Title</label><input type="text" id="m-title" placeholder="e.g. Solar-powered school water pump" required /></div>';
+      html += '<div class="field"><label class="req">Milestone Title</label><input type="text" id="m-title" placeholder="e.g. Solar-powered school water pump" required /></div>';
       html += '<div class="field"><label>Submission Type</label><select id="m-type"><option value="proposal">Solution Proposal</option><option value="prototype">Prototype Update</option><option value="pilot">Pilot Report</option><option value="final">Final Report</option><option value="other">Other</option></select></div>';
       html += '</div>';
-      html += '<div class="field"><label class="req">Solution proposal</label><textarea id="m-notes" required placeholder="Describe: 1) root cause and proposed solution, 2) student team and skills, 3) beneficiaries and expected measurable impact, 4) materials/budget, 5) timeline, and 6) risks or permissions needed."></textarea></div>';
-      html += '<button type="submit" class="btn sm">Submit for HEI Review</button>';
+      html += '<div class="field"><label class="req">Milestone Details / Update Notes</label><textarea id="m-notes" required placeholder="Describe the progress: work completed, results or measurements, student team involved, beneficiaries, materials/budget used, next steps, and any risks."></textarea></div>';
+      html += '<button type="submit" class="btn sm">Submit Update for HEI Review</button>';
       html += '</form>';
 
       if (p.milestones && p.milestones.length) {
         html += '<div class="table-wrap"><table class="tbl"><thead><tr><th>Milestone</th><th>Type</th><th>Status</th><th>Submitted</th><th>Notes</th></tr></thead><tbody>';
-        html += p.milestones.map((m) => '<tr><td><b>' + J.esc(m.title) + '</b></td><td><span class="pill">' + J.esc(m.type) + '</span></td><td><span class="badge approved">' + J.esc(m.status) + '</span></td><td>' + J.fmtDate(m.submitted_at) + '</td><td class="muted">' + J.esc(m.notes || '—') + '</td></tr>').join('');
+        html += p.milestones.map((m) => '<tr><td><b>' + J.esc(m.title) + '</b></td><td><span class="pill">' + J.esc(m.type) + '</span></td><td><span class="pill">' + J.esc(m.status) + '</span></td><td>' + J.fmtDate(m.submitted_at) + '</td><td class="muted">' + J.esc(m.notes || '—').replace(/\n/g, '<br/>') + '</td></tr>').join('');
         html += '</tbody></table></div>';
       } else {
         html += '<p class="muted">No milestones recorded yet. Add the first project milestone above.</p>';
@@ -172,7 +172,7 @@
           const title = $('m-title').value.trim();
           const type = $('m-type').value;
           const notes = $('m-notes').value.trim();
-          if (!title || !notes) return J.toast('Proposal title and solution details are required.', true);
+          if (!title || !notes) return J.toast('Milestone title and details are required.', true);
           try {
             await J.api('/projects/' + encodeURIComponent(id) + '/milestones', {
               method: 'POST',
